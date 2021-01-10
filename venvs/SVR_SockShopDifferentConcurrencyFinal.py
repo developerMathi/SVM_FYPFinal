@@ -10,7 +10,6 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler
 
 
-
 def mean_absolute_percentage_error(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true))
@@ -48,7 +47,9 @@ y = dataset.iloc[:nor, [7]].values
 
 
 scalerX = MinMaxScaler()
+scalerY = MinMaxScaler()
 X = scalerX.fit_transform(X)
+y = scalerY.fit_transform(y)
 
 print('Standardization done')
 print(X)
@@ -73,7 +74,7 @@ from sklearn.svm import SVR
 gsc = GridSearchCV(
     estimator=SVR(kernel='rbf'),
     param_grid={
-        'C': [1.5, 10, 100, 1000],
+        'C': [1,10,100,1000,1.5],
         'epsilon': [0.1, 0.2, 0.3, 0.5],
         'gamma': [1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
     },
@@ -101,6 +102,7 @@ regressor.fit(XTrain, yTrain)
 
 # Calculate errors
 yTestPredict = regressor.predict(XTest)
+print('eufghe3uf',yTest)
 mse = mean_squared_error(yTest, yTestPredict, squared=True)
 rmse = mean_squared_error(yTest, yTestPredict, squared=False)
 mae = mean_absolute_error(yTest, yTestPredict)
@@ -109,6 +111,9 @@ print("The mean squared error (MSE) on test set: {:.4f}".format(mse))
 print("The root Mean Square Error (RMSE) on test set: {:.4f}".format(rmse))
 print("The mean absolute error on test set: {:.4f}".format(mae))
 print("The mean absolute percentage error on test set: {:.4f}".format(mape))
+errors = [['mean squared error (MSE)', mse], ['root Mean Square Error (RMSE)', rmse], ['mean absolute error', mae],
+          ['mean absolute percentage error', mape]]
+
 print(regressor.get_params(deep=True))
 
 # prediction part
@@ -132,18 +137,18 @@ for i in orderCoresArray:
                 newx = [Order_API_Concurrency, Carts_API_Concurrency, i, j, k, l]
                 newXArray.append(newx)
 
-
 # new_X = [Order_API_Concurrency, Carts_API_Concurrency, Order_Cores, Order_DB_Cores, Carts_Cores, Carts_DB_Cores]
 # print('X value ', new_X)
 
-predicted_y = regressor.predict(scalerX.fit_transform(newXArray))
+predicted_y =scalerY.inverse_transform([regressor.predict(scalerX.fit_transform(newXArray))])
 print('Predicted y ', predicted_y)
 
 for p in range(len(newXArray)):
-    newXArray[p].append(predicted_y[p])
+    newXArray[p].append(predicted_y[0][p])
 
 df = pd.DataFrame(newXArray)
 df1 = pd.DataFrame(predicted_y)
+df2=pd.DataFrame(errors)
 
 ## save to xlsx file
 
@@ -152,5 +157,4 @@ filepath = 'my_excel_file.xlsx'
 with pd.ExcelWriter(filepath) as writer:
     df.to_excel(writer, sheet_name='input and output')
     df1.to_excel(writer, sheet_name='output')
-
-
+    df2.to_excel(writer, sheet_name='Accuracy Matrix')
