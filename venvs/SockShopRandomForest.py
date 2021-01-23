@@ -36,10 +36,8 @@ y = dataset.iloc[:, [7]].values
 # Standardization of data
 
 
-scalerX = MinMaxScaler()
-scalerY = MinMaxScaler()
-X = scalerX.fit_transform(X)
-y = scalerY.fit_transform(y)
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
 
 print('Standardization done')
 print(X)
@@ -57,7 +55,6 @@ model.fit(XTrain, yTrain)
 
 # Calculate errors
 yTestPredict = model.predict(XTest)
-print('eufghe3uf', yTest)
 mse = mean_squared_error(yTest, yTestPredict, squared=True)
 rmse = mean_squared_error(yTest, yTestPredict, squared=False)
 mae = mean_absolute_error(yTest, yTestPredict)
@@ -66,8 +63,26 @@ print("The mean squared error (MSE) on test set: {:.4f}".format(mse))
 print("The root Mean Square Error (RMSE) on test set: {:.4f}".format(rmse))
 print("The mean absolute error on test set: {:.4f}".format(mae))
 print("The mean absolute percentage error on test set: {:.4f}".format(mape))
-errors = [['mean squared error (MSE)', mse], ['root Mean Square Error (RMSE)', rmse], ['mean absolute error', mae],
-          ['mean absolute percentage error', mape]]
+errors = [['mean squared error (MSE) in test data', mse], ['root Mean Square Error (RMSE) test data', rmse], ['mean absolute error test data', mae],
+          ['mean absolute percentage error test data', mape]]
+
+
+print()
+# Calculate errors
+yTrainPredict = model.predict(XTrain)
+mse = mean_squared_error(yTrain, yTrainPredict, squared=True)
+rmse = mean_squared_error(yTrain, yTrainPredict, squared=False)
+mae = mean_absolute_error(yTrain, yTrainPredict)
+mape = mean_absolute_percentage_error(yTrain, yTrainPredict)
+print("The mean squared error (MSE) on train set: {:.4f}".format(mse))
+print("The root Mean Square Error (RMSE) on train set: {:.4f}".format(rmse))
+print("The mean absolute error on train set: {:.4f}".format(mae))
+print("The mean absolute percentage error on train set: {:.4f}".format(mape))
+errors .append(['mean squared error (MSE) in train data', mse])
+errors .append(['root Mean Square Error (RMSE) in train data', rmse])
+errors .append(['mean absolute error in train data', mae])
+errors .append(['mean absolute percentage error in train data', mape])
+
 
 print(model.get_params(deep=True))
 
@@ -95,7 +110,7 @@ for i in orderCoresArray:
 # new_X = [Order_API_Concurrency, Carts_API_Concurrency, Order_Cores, Order_DB_Cores, Carts_Cores, Carts_DB_Cores]
 # print('X value ', new_X)
 
-predicted_y = scalerY.inverse_transform([model.predict(scalerX.fit_transform(newXArray))])
+predicted_y = [model.predict(scaler.transform(newXArray))]
 print('Predicted y ', predicted_y)
 
 for p in range(len(newXArray)):
